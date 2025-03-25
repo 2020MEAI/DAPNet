@@ -4,7 +4,10 @@
 
 This repository contains source code and datasets for paper "DAPNet: multi-view graph contrastive network incorporating disease clinical and molecular associations for disease progression prediction". In this study, we proposed DAPNet, a deep learning-based disease progression prediction model that solely utilizes the comorbidity duration (without relying on multi-modal data or comprehensive medical records) and disease associations from biomedical knowledge graphs to deliver high-performance prediction. DAPNet is the first to apply multi-view graph contrastive learning to disease progression prediction tasks. Compared with other studies on comorbidities, DAPNet innovatively integrates molecular-level disease association information, combines disease co-occurrence and ICD-10, and fully explores the associations between diseases;
 
-  
+## Overview
+![Fig1-20240114](https://github.com/user-attachments/assets/a2a6622e-457c-478c-b938-4d8fd96dd41a)
+
+Fig. 1 Overview of disease progression prediction framework. A Clinical representation module based on clinical features. B Network representation module based on multi-source disease association networks. C Feature fusion and disease progression prediction module
 ## A Quick Start
 Before our program runs, we need to make some preparations.
 
