@@ -103,7 +103,7 @@ def train():
 
 
     model =GraphConvolution_DAPNet(3051, len(adj_co), 32,
-                                 features_co,adj_co,features_gene,adj_gene,features_icd,adj_icd)# 第一个参数为特征维度大小，第二个参数为词向量维度
+                                 features_co,adj_co,features_gene,adj_gene,features_icd,adj_icd)# The first parameter is the size of the feature dimension, and the second parameter is the word vector dimension
 
 
     plt_train_loss=[]
@@ -157,9 +157,9 @@ def train():
     pd_pre['result_check'] = y_test_list
     pd_pre.to_csv(bp + model_name + '_pre' + '.csv', index = False)
 
-    fig = plt.figure()  # figsize是图片的大小`
+    fig = plt.figure()  
     plt.plot(range(len(plt_train_loss)), plt_train_loss, 'b-', label='loss')
-    # x = MultipleLocator(100)  # x轴每10一个刻度
+    # x = MultipleLocator(100)  
     # ax.xaxis.set_major_locator(x)
 
     plt.ylim(0, 1)
