@@ -11,8 +11,8 @@ def read_x_vec_data(new_str):
     return feature_name
 
 
-#根据网络构建邻接矩阵和特征矩阵
-def construct_adj_wordvec(feature_name,network_path,xfeature_path,adj_path):#构建网络_network
+#Construct adjacency matrix and feature matrix based on the network
+def construct_adj_wordvec(feature_name,network_path,xfeature_path,adj_path):
     #'../data_gcn/total_network.csv'
     network = pd.read_csv(network_path).values[:,1:]
     # disease_icd = pd.read_csv(network_path)[['source','target']].values
@@ -44,7 +44,7 @@ def construct_adj_wordvec(feature_name,network_path,xfeature_path,adj_path):#构
                 dict_wordvec[key] = re.sub(r'\s','',icd_name[key[0:3]])
             else:
                 dict_wordvec[key] = '无'
-    #读取glove词向
+    #read glove embedding
     dict_glove = {}
     with open('../data/vectors.txt','r',encoding='utf-8') as f:
         lines = f.readlines()
@@ -67,11 +67,7 @@ def construct_adj_wordvec(feature_name,network_path,xfeature_path,adj_path):#构
         vec = vec/i
         dict_icd_wordvec[key] = list(vec)
     print("length dict_icd_wordvec:",len(dict_icd_wordvec))
-    #构建特征矩阵，和邻接矩阵
-    # icd_list = []
-    # for key in dict_icd_wordvec:
-    #     icd_list.append(key)
-    # icd_list.sort()  # 按字典顺序升序排列
+    
     icd_list = feature_name.copy()
     dict_icd_num = {key:i for i,key in enumerate(icd_list)}
     adj = np.zeros((len(icd_list),len(icd_list)),dtype=float)
@@ -103,7 +99,7 @@ def network_filter(network_path,feature_name,out_path):
 
 
 def statistic_weight(network_path):
-    '''统计网络属性'''
+    '''Statistical network properties'''
     adj = pd.read_csv(network_path).values[:,:]
     print("adj shape:",adj.shape)
     print("adj shape:",np.sum(adj))
@@ -111,7 +107,7 @@ def statistic_weight(network_path):
 
 def icd_statistic(path):
     network = pd.read_csv(path,engine='python').values[:,:]
-    print("网络中边数量",network.shape)#
+    print("network relations ",network.shape)#
     node_number = set(network[:,0:2].reshape(-1))
     print("node number:",len(node_number))
 
@@ -123,7 +119,7 @@ def network_merge(path1,path2,path3,path4):
     icd_network = pd.read_csv(path3).values[:,:]
 
     total_network = co_network+gene_network+icd_network
-    total_network[total_network!=0] = 1 #将整个网络中归一化
+    total_network[total_network!=0] = 1 # Normalize the entire network
 
     df = pd.DataFrame(total_network,columns=feature_name)
     df.to_csv(path4, index=False)
@@ -166,11 +162,11 @@ def start(pre_dis_list):
                           path3)
     print('construct_adj_wordvec over !')
     print('statistic_weight start !')
-    statistic_weight(path1) #统计
+    statistic_weight(path1) #Statistical
     statistic_weight(path3)
     statistic_weight(path2)
 
-    icd_statistic(new_icd_net_path) #统计
+    icd_statistic(new_icd_net_path) #Statistical
     icd_statistic(new_gene_net_path)
     icd_statistic(new_co_net_path)
 
