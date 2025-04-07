@@ -5,7 +5,7 @@ import time
 from tqdm import tqdm
 import pickle
 import random
-def patient(new_str):  # 构建整体数据集
+def patient(new_str):  # build datasets
     with open('../data2024/dict_patient_'+new_str+'.pkl', 'rb') as file:
         dict_patient = pickle.load(file)
     return dict_patient
@@ -18,16 +18,16 @@ def read_x_vec_data(new_str):
         feature_name = pickle.load(file)
     return feature_name
 
-def construct_icd_list(network_path):#构建网络_network
+def construct_icd_list(network_path):# build_network
     import re
     #'../data_gcn/total_network.csv'
     network = pd.read_csv(network_path).values[:,1:]
     disease_icd = pd.read_csv(network_path)[['source','target']].values
     # disease_icd = pd.read_csv(network_path)[['icd1', 'icd2']].values
-    disease_icd = list(set(disease_icd.reshape(-1)))# neteork 所有节点+去重
+    disease_icd = list(set(disease_icd.reshape(-1)))# neteork All nodes+deduplication
     print("disease icd number :",len(disease_icd))
     icd_name = {}
-    icd10_3 = pd.read_excel('../data/3位代码类目表（ICD-10）.xls').values # 读取icd编码及对应中文
+    icd10_3 = pd.read_excel('../data/3位代码类目表（ICD-10）.xls').values # read icd code and name
     icd10_4 = pd.read_excel('../data/4位代码亚目表（ICD-10）.xls').values
     for line in icd10_3:
         if line[1] is np.nan:
@@ -42,7 +42,7 @@ def construct_icd_list(network_path):#构建网络_network
             icd_name[line[0]] = line[1]
     dict_wordvec = {}
 
-    for key in disease_icd:# 生成disease_icd所有icd对应中文字典dict_wordvec
+    for key in disease_icd:# build {icd > Chinese_name} dict_wordvec
         if key[-1] == '0':
             key=key[0:3]
         if key in icd_name:
@@ -54,7 +54,7 @@ def construct_icd_list(network_path):#构建网络_network
             else:
                 dict_wordvec[key] = '无'
     # print("disease icd number new :", len(dict_wordvec))
-    #读取glove词向
+    #read glove embedding
     dict_glove = {}
     with open('../data/vectors.txt', 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -64,7 +64,7 @@ def construct_icd_list(network_path):#构建网络_network
             value = line[1:]
             dict_glove[key] = np.array(value,dtype=np.float)
     dict_icd_wordvec = {}
-    for key,value in dict_wordvec.items():# 根据字典dict_wordvec中文文字对应的子向量生成icd特征，200维
+    for key,value in dict_wordvec.items():# Generate icd features based on the vectors corresponding to Chinese characters in the dictionary dictw_ordvec, 200 dimensions
         i = 0
         vec = np.zeros(200)
         for s in value:
@@ -74,11 +74,11 @@ def construct_icd_list(network_path):#构建网络_network
         vec = vec/i
         dict_icd_wordvec[key] = list(vec)
     print("length dict_icd_wordvec:",len(dict_icd_wordvec))
-    #构建特征矩阵，和邻接矩阵
+    # build adj matrix
     icd_list = []
     for key in dict_icd_wordvec:
         icd_list.append(key)
-    icd_list.sort()  # 按字典顺序升序排列
+    icd_list.sort()  # sort
     dict_icd_num = {key:i for i,key in enumerate(icd_list)}
     return icd_list,dict_icd_num
 
@@ -124,7 +124,7 @@ def bulid_patient_record_matrix5(dict_patient, icd_list, pre_disease_list,pre_re
         matrix = np.zeros(len(icd_list)).tolist()
         record_list = dict_patient[key]
         record_list = record_error_correction(record_list)
-        pre_disease_Seizure_index=-1 # 预测疾病首次出现index
+        pre_disease_Seizure_index=-1 # Index of the first appearance of the disease
         #find pre disease index
         flag = False
         pre_disease_name = ''
@@ -134,9 +134,9 @@ def bulid_patient_record_matrix5(dict_patient, icd_list, pre_disease_list,pre_re
                 flag= True
                 pre_disease_name = find_co_dis2(record_list[record_index],pre_disease_list)
                 break
-        if flag == False:# 不相关
+        if flag == False:
             pass
-        # elif pre_disease_Seizure_index == 0:# 首次就出现
+        # elif pre_disease_Seizure_index == 0:
         #     pass
         elif pre_disease_Seizure_index > 3:
             index_4 = 0
@@ -150,7 +150,7 @@ def bulid_patient_record_matrix5(dict_patient, icd_list, pre_disease_list,pre_re
                     else:
                         disease_statastic_dict[dis_] = disease_score[index_4]
                 index_4 += 1
-                if index_4 >3: # 只保留4次记录
+                if index_4 >3: # Only keep 4 records
                     break
             total_record_size += index_4
             record_num = len(record_list)
@@ -234,7 +234,7 @@ def build_features_data(pre_dis_list):
 
     end_time_1 = time.time()
     cost_time_1 =(end_time_1 - start_time) / 60
-    print("读取文件耗时为：%d分钟" % cost_time_1)
+    print("The time to read the file is：%d min" % cost_time_1)
     df_pre_record,df_pre_result,pre_record_list = bulid_patient_record_matrix5(dict_patient, feature_name,
                                                                                 pre_dis_list, 1,
                                                                                 f'../result2024/pre_matrix_record_{new_str}_{data_v}.csv'
@@ -242,7 +242,7 @@ def build_features_data(pre_dis_list):
 
     end_time_2 = time.time()
     cost_time_2 =(end_time_2 - end_time_1) / 60
-    print("预测数据处理耗时为：%d分钟" % cost_time_2)
+    print("The predicted data processing time is：%d min" % cost_time_2)
     df_ran_record1, df_ran_result1, ran_record_list1 = bulid_patient_record_matrix5(dict_patient, feature_name,
                                                                                     feature_name_ran[0:10], 0,
                                                                                     f'../result2024/ran_matrix_record_{new_str}_{data_v}.csv'
@@ -265,7 +265,7 @@ def build_features_data(pre_dis_list):
                                                                                  f'../result2024/ran_matrix_result_{new_str}_{data_v}.csv')
     end_time_3 = time.time()
     cost_time_3 = (end_time_3 - end_time_2) / 60
-    print("负样本数据处理耗时为：%d分钟" % cost_time_3)
+    print("The processing time for negative sample data is：%d min" % cost_time_3)
 
     network_filter(new_str,df_pre_record, df_pre_result, df_ran_record1, df_ran_result1,df_ran_record2, df_ran_result2,
                    df_ran_record3, df_ran_result3,
