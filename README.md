@@ -25,10 +25,16 @@ We recommend using version 1.15 of TensorFlow 1.
 ### Diseases network
 Based on the relationship data of diseases, this study sorted and constructed three disease networks from different perspectives. The construction process is detailed in section 2.1 of the paper. Although their sources are different, the file format is consistent. For each network, we need
 - Adjacency matrix(data/adj_matrix.csv). And their row and column sizes are the same.
-- Feature matrix(data/Graph_embeddingfull.npy). The rows correspond to the number of diseases, and the columns correspond to initial weights, such as text embedding.
+- Feature matrix(data/Graph_embeddingfull.npy.zip > data/Graph_embeddingfull.npy). The rows correspond to the number of diseases, and the columns correspond to initial weights, such as text embedding. In this study, we used [MA-GCL](https://github.com/GXM1141/MA-GCL) as the network feature extraction model.
 
 ### Datasets
 To better represent the phenotypes of patients, this study proposed a new method for calculating illness duration to reflect the impact of disease duration. The process of constructing the dataset is detailed in section 2.2 of the paper, and the codes are in the  '/pre' folder. The final file can refer to 'data/train_demo'.csv.
++ bulid_time_data.py: Construction of dataset.
+### Main code
+The python script file of the model is shown in this project(/model), including the following files:
+
+model.py: The algorithm code.
+train.py: Run the entire program.
 
 ### Running
 Jump to /model folder, and run the Python file.
@@ -39,7 +45,7 @@ nohup python -u train.py > DAPNet.txt 2>&1 &
 If you find PresRecST useful for your research, please consider citing the following paper:
 
 Tian, H., He, X., Yang, K. et al. DAPNet: multi-view graph contrastive network incorporating disease clinical and molecular associations for disease progression prediction. BMC Med Inform Decis Mak 24, 345 (2024). https://doi.org/10.1186/s12911-024-02756-0
-
+```shell
 @article{tian2024dapnet,
   title={DAPNet: multi-view graph contrastive network incorporating disease clinical and molecular associations for disease progression prediction},
   author={Tian, Haoyu and He, Xiong and Yang, Kuo and Dai, Xinyu and Liu, Yiming and Zhang, Fengjin and Shu, Zixin and Zheng, Qiguang and Wang, Shihua and Xia, Jianan and others},
@@ -50,3 +56,4 @@ Tian, H., He, X., Yang, K. et al. DAPNet: multi-view graph contrastive network i
   year={2024},
   publisher={Springer}
 }
+```
