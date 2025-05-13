@@ -1,18 +1,12 @@
-
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-
-
 from model import GraphConvolution_DAPNet
 import scipy.io as scio
 from sklearn.metrics import roc_auc_score
 import datetime
 import os
-
 import matplotlib.pyplot as plt
-
-
 os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
 def read_data():
@@ -20,7 +14,6 @@ def read_data():
     x_vec = pd_data.values[:, :]
     X_train, X_test, y_train, y_test = train_test_split(x_vec[:, 1:3052], x_vec[:, 3052:3053], test_size = 0.2,
                                                         shuffle = False)
-    # print(np.sum(new_ytrain,axis=0))
     dis_list = pd_data.columns.values.tolist()[1:3052]
     print(sum(y_train))
     print(sum(y_test))
@@ -28,7 +21,6 @@ def read_data():
 
 
 def get_batch(x_train, y_train,batch_size):
-    # batch_size = 64
     n = int(len(x_train) / batch_size)
     for i in range(n):
         end = min((i + 1) * batch_size, len(x_train))
@@ -42,14 +34,11 @@ def evaluate(y_test, y_pre, name, thre):
     y_pre = np.rint(np.array(y_pre) + thre)
     y_test = y_test.reshape(-1)
     y_pre = y_pre.reshape(-1)
-    # y_pre = np.rint(y_pre)
     y_test_id = np.where(y_test > 0.8)[0]
     y_pre_id = np.where(y_pre > 0.8)[0]
     print("jiaoji:", len(set(y_test_id) & set(y_pre_id)))
     print("len y test id:", len(y_test_id))
     print("len y pre id:", len(y_pre_id))
-    # print(y_pre_id)
-    # print(y_test_id)
     pre = len(set(y_test_id) & set(y_pre_id)) / len(y_pre_id)
     recall = len(set(y_test_id) & set(y_pre_id)) / len(y_test_id)
     f1 = (2 * pre * recall) / (pre + recall)
@@ -67,7 +56,6 @@ def evaluate_mid(y_test, y_pre, name, thre):
     y_pre = np.rint(np.array(y_pre) + thre)
     y_test = y_test.reshape(-1)
     y_pre = y_pre.reshape(-1)
-    # y_pre = np.rint(y_pre)
     y_test_id = np.where(y_test > 0.8)[0]
     y_pre_id = np.where(y_pre > 0.8)[0]
     pre = len(set(y_test_id) & set(y_pre_id)) / len(y_pre_id)
@@ -97,13 +85,9 @@ def train():
         f_r.write("adj co shape:"+str(adj_co.shape)+ '\n')
         f_r.write("gene icd shape:" + str(adj_gene.shape) + '\n')
         f_r.write("icd icd shape:" + str(adj_icd.shape) + '\n')
-        # f_r.write("adj co density:" + str(sum(adj_co)/3615) + '\n')
-        # f_r.write("adj gene density:" + str(sum(adj_gene)/3615) + '\n')
-        # f_r.write("adj icd density:" + str(sum(adj_icd)/3615) + '\n')
-
 
     model =GraphConvolution_DAPNet(3051, len(adj_co), 32,
-                                 features_co,adj_co,features_gene,adj_gene,features_icd,adj_icd)# The first parameter is the size of the feature dimension, and the second parameter is the word vector dimension
+                                 features_co,adj_co,features_gene,adj_gene,features_icd,adj_icd)# 第一个参数为特征维度大小，第二个参数为词向量维度
 
 
     plt_train_loss=[]
@@ -111,13 +95,11 @@ def train():
     best_epoch ,best_pre, best_recall, best_f1, best_auc = 0, 0, 0, 0, 0
 
     for epoch in range(1000):
-    # for epoch in range(10):
         epoch_loss = []
         for batch_x, batch_y, i in get_batch(x_train, y_train,256):
             feed_dict = {model.input_x: batch_x, model.input_y: batch_y, model.tf_is_training: True}
             _, loss = model.sess.run([model.train_loss, model.cross_entropy],feed_dict=feed_dict)
             epoch_loss.append(loss)
-            # print(gcn2[0])
         print("{} epoch,epoch_loss:{}".format(epoch, np.mean(epoch_loss)))
         plt_train_loss.append(epoch_loss)
         with open(result_path, 'a', encoding='utf-8') as f_r:
@@ -157,11 +139,8 @@ def train():
     pd_pre['result_check'] = y_test_list
     pd_pre.to_csv(bp + model_name + '_pre' + '.csv', index = False)
 
-    fig = plt.figure()  
+    fig = plt.figure()
     plt.plot(range(len(plt_train_loss)), plt_train_loss, 'b-', label='loss')
-    # x = MultipleLocator(100)  
-    # ax.xaxis.set_major_locator(x)
-
     plt.ylim(0, 1)
     plt.xticks(size=12)
     plt.yticks(size=12)
@@ -176,7 +155,6 @@ if __name__ == '__main__':
         f_r.write(str(datetime.datetime.now()) + '\n')
         f_r.write("***************" + model_name + " new model******************" + '\n')
     train()
-    # test()
     end_time = datetime.datetime.now()
     delta = end_time - start_time
     with open(result_path, 'a', encoding = 'utf-8') as f_r:
@@ -184,10 +162,5 @@ if __name__ == '__main__':
         f_r.write("***************" + model_name + " end ***********************" + '\n'+ '\n')
     print(delta)
 
-
-
-    # nohup python -u J002_1train_cnn_gcn_mlp.py > J002_3cnn_gcn_mlp.txt 2>&1 &
-
-    # conda activate tf115
 
 
