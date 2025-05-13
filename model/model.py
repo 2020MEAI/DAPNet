@@ -1,10 +1,5 @@
 import tensorflow as tf
-
-import pandas as pd
 import numpy as np
-import math
-import datetime
-
 
 class GraphConvolution_DAPNet():
     """
@@ -50,21 +45,18 @@ class GraphConvolution_DAPNet():
             return wb
 
     def max_pool(self,input_2d, width, height):
-        # 先将数据扩展为4维
+        # expand 4d
         input_3d = tf.expand_dims(input_2d, 0)  # shape = [1,5,5]
         input_4d = tf.expand_dims(input_3d, 3)  # shape = [1,5,5,1]
 
-        # 池化操作
+        # pool
         pool_output = tf.nn.max_pool(input_4d, ksize = [1, height, width, 1], strides = [1, 1, 1, 1], padding = 'VALID')
-
-        # 降维
         pool_output_2d = tf.squeeze(pool_output)  # shape = [4,4]
 
         return pool_output_2d
     def add_cnn_pool(self, inputs):
         my_filter = tf.Variable(tf.random_normal(shape = [1, 16, 1, 1]))
         input_2d = tf.expand_dims(inputs, 0)
-        # input_3d = tf.expand_dims(input_2d, 0)
         input_4d = tf.expand_dims(input_2d, 3)
         print(input_4d.shape)
         conv2 = tf.nn.conv2d(input_4d, filter = my_filter, strides = [1, 1, 8, 1], padding = "VALID")
@@ -105,21 +97,14 @@ class GraphConvolution_DAPNet():
             self.gcn_out_fix = self.add_layer(self.gcn_x, 1536, 76, tf.nn.tanh, 'gcn_out_fix')
         with tf.name_scope('concat_model_result'):
             self.x = tf.concat([self.gcn_out_fix,self.fix_3,self.fix_5],axis=1)
-            # self.x_dropout = tf.layers.dropout(self.x,rate=0.5,training=self.tf_is_training,name='x_dropout')
-        #classify
 
         with tf.name_scope('classfier'):#
             self.tf_x3 = self.add_layer(self.x,152,32,tf.nn.tanh,'tf_layer1')
-            # tf_x3_dropout = tf.layers.dropout(tf_x3,rate=0.5,training=self.tf_is_training,name='tf_x3_dropout')
-            # tf_x4 = self.add_layer(tf_x3,100,50,tf.nn.tanh,'tf_layer2')
-            # tf_x4_dropout = tf.layers.dropout(tf_x4, rate=0.5, training=self.tf_is_training, name='tf_x4_dropout')
             self.prediction = self.add_layer(self.tf_x3,32,1,tf.nn.sigmoid,'tf_layer3')
-        # with tf.name_scope('classfier'):
-        #     self.prediction = self.logistic(self.x_dropout,268,1,tf.nn.sigmoid,'logistic_1')
+
         with tf.name_scope('loss'):
             self.cross_entropy = -tf.reduce_mean((self.input_y * tf.log(self.prediction + 1e-9) +
-                                                  (1 - self.input_y) * tf.log(1 - self.prediction + 1e-9)), name='loss')
-            # self.cross_entropy = tf.reduce_mean(tf.losses.mean_squared_error(labels=self.input_y,predictions=self.prediction))
+                                                 (1 - self.input_y) * tf.log(1 - self.prediction + 1e-9)), name='loss')
             self.train_loss = tf.train.AdamOptimizer(self.lr).minimize(self.cross_entropy)
 
     def gen_adj(self,adj):
